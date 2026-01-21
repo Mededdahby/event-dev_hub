@@ -1,9 +1,11 @@
 import mongoose, { Mongoose } from "mongoose";
+import dns from "node:dns/promises";
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI as string;
 
 if (!MONGODB_URI) {
-  throw new Error("Missing MONGODB_URI in environment variables.");
+  throw new Error("Please define MONGODB_URI in .env.local");
 }
 
 type MongooseCache = {
@@ -19,13 +21,16 @@ const cached: MongooseCache =
   globalThis.mongoose ?? (globalThis.mongoose = { conn: null, promise: null });
 
 export async function connectToDatabase(): Promise<Mongoose> {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    // Reuse the same connection promise across hot reloads in development.
-    cached.promise = mongoose.connect(MONGODB_URI);
+    cached.promise = mongoose
+      .connect(MONGODB_URI, { bufferCommands: false })
+      .catch((err) => {
+        cached.promise = null;
+        console.error("Mongo connect error:", err);
+        throw err;
+      });
   }
 
   cached.conn = await cached.promise;
