@@ -137,7 +137,7 @@ const eventSchema = new Schema<EventDocument>(
   { timestamps: true },
 );
 
-eventSchema.pre("save", function (next) {
+eventSchema.pre("save", function () {
   // Only regenerate slug when the title changes.
   if (this.isModified("title")) {
     this.slug = toSlug(this.title);
@@ -146,12 +146,10 @@ eventSchema.pre("save", function (next) {
   // Normalize date to ISO and enforce a consistent time format.
   const normalizedDate = new Date(this.date);
   if (Number.isNaN(normalizedDate.getTime())) {
-    return next(new Error("Invalid date format."));
+    throw new Error("Invalid date format.");
   }
   this.date = normalizedDate.toISOString();
   this.time = normalizeTime(this.time);
-
-  return next();
 });
 
 export const Event: Model<EventDocument> =
