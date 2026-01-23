@@ -1,8 +1,11 @@
 import ExpoloreBtn from "@/components/ExpoloreBtn";
 import EventCard from "@/components/EventCrad";
-import events from "@/lib/constants";
+import { EventDocument } from "@/database/event.model";
+const NEXT_URI = process.env.NEXT_PUBLIC_URI;
+const Page = async () => {
+  const res = await fetch(`${NEXT_URI}/api/events`);
+  const { events } = await res.json();
 
-const Page = () => {
   return (
     <section>
       <h1 className="text-center">
@@ -15,11 +18,13 @@ const Page = () => {
       <div>
         <h3 className="mt-20 space-y-7 "> Featured Events</h3>
         <ul className="events list-none">
-          {events.map((event) => (
-            <li key={event.title}>
-              <EventCard {...event} />
-            </li>
-          ))}
+          {events &&
+            events.length > 0 &&
+            events.map((event: EventDocument) => (
+              <li key={event.title}>
+                <EventCard {...event} />
+              </li>
+            ))}
         </ul>
       </div>
     </section>
