@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await connectToDatabase();
 
@@ -81,8 +81,8 @@ export async function GET() {
   } catch (e) {
     return NextResponse.json(
       {
-        message: "Faild to fetch Events ",
-        error: e instanceof Error ? e : "Unknown error",
+        message: "Failed to fetch Events",
+        error: e instanceof Error ? e.message : "Unknown error",
       },
       { status: 500 },
     );

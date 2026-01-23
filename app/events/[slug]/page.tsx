@@ -1,6 +1,5 @@
 import { EventDocument } from "@/database/event.model";
 import Image from "next/image";
-import Link from "next/link";
 
 const NEXT_URI = process.env.NEXT_PUBLIC_URI;
 type PromiseParams = {
@@ -17,31 +16,46 @@ const EventDetailsItem = ({
   label: string;
 }) => {
   return (
-    <div className="flex-row-gap-2">
+    <div className="flex flex-row gap-2">
+      {" "}
       <Image src={icon} alt={alt} width={17} height={17} />
       <span>{label}</span>
     </div>
   );
 };
+const EventAgendaItems = ({ agendaItems }: { agendaItems: string[] }) => {
+  return (
+    <div className="agenda">
+      <h2>Agenda</h2>
+      <ul>
+        {agendaItems.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
-const EventAgencdaItems = ({ agendaItems }: { agendaItems: string[] }) => {
-  <div className="agenda">
-    <h2>Agenda</h2>
-    <ul>
-      {agendaItems.map((item) => (
-        <li key={item}>{item}</li>
+const EventTags = ({ tags }: { tags: string[] }) => {
+  return (
+    <div className="tags flex-row gap-1.5 flex-wrap ">
+      {tags.map((tag) => (
+        <div className="pill" key={tag}>
+          {tag}
+        </div>
       ))}
-    </ul>
-  </div>;
+    </div>
+  );
 };
 
 const EventDetails = async ({ params }: PromiseParams) => {
   const { slug } = await params;
-  console.log("SLUG , ", slug);
+
   const res = await fetch(`${NEXT_URI}/api/events/${slug}`);
-  console.log("RES STATUS", res.status);
   if (!res.ok) {
-    throw new Error("Failed to fetch event data");
+    if (!res.ok) {
+      throw new Error("Failed to fetch event data");
+    }
   }
 
   const data = await res.json();
@@ -63,11 +77,11 @@ const EventDetails = async ({ params }: PromiseParams) => {
             height={800}
             className="banner"
           />
-          <section className="flex-col-gap-2">
+          <section className="flex flex-col gap-2">
             <h2>Overview</h2>
             <p>{event.overview}</p>
           </section>
-          <section className="flex-col-gap-2">
+          <section className="flex flex-col gap-2">
             <h2>Event Details</h2>
             <EventDetailsItem
               icon="/icons/calendar.svg"
@@ -79,6 +93,7 @@ const EventDetails = async ({ params }: PromiseParams) => {
                 day: "numeric",
               })}
             />
+
             <EventDetailsItem
               icon="/icons/clock.svg"
               alt="clock Icon"
@@ -89,7 +104,6 @@ const EventDetails = async ({ params }: PromiseParams) => {
               alt="pin Icon"
               label={event.location}
             />
-
             <EventDetailsItem
               icon="/icons/mode.svg"
               alt="mode Icon"
@@ -102,9 +116,17 @@ const EventDetails = async ({ params }: PromiseParams) => {
             />
           </section>
           {/* //TODO: Agenda component should be an arry of string comming from db */}
-          {/* <EventAgencdaItems agendaItems={JSON.parse(event.agenda[0])} /> */}
+          {event.agenda && event.agenda.length > 0 && (
+            <EventAgendaItems agendaItems={event.agenda} />
+          )}
+          <section className="flex-col-gap-2 ">
+            <h2>About the Organizer</h2>
+            <p>{event.organizer}</p>
+          </section>
+          {event.tags && event.tags.length > 0 && (
+            <EventTags tags={event.tags} />
+          )}{" "}
         </div>
-
         {/* Event Booking */}
         <aside className="booking">
           <h2>Book Your Spot</h2>
@@ -116,5 +138,4 @@ const EventDetails = async ({ params }: PromiseParams) => {
     </section>
   );
 };
-
 export default EventDetails;
