@@ -1,6 +1,8 @@
 import { EventDocument } from "@/database/event.model";
+import BookEvent from "@/components/BookEvent";
 import Image from "next/image";
-
+import EventCard from "@/components/EventCrad";
+import { GetSimilarEvents } from "@/lib/actions/event.actions";
 const NEXT_URI = process.env.NEXT_PUBLIC_URI;
 type PromiseParams = {
   params: Promise<{ slug: string }>;
@@ -58,8 +60,14 @@ const EventDetails = async ({ params }: PromiseParams) => {
     }
   }
 
+  // supports both {event:{}} or direct object
+
+  const bookings = 10;
+
+  const similarEvents: EventDocument[] = await GetSimilarEvents({ slug });
+
   const data = await res.json();
-  const event: EventDocument = data?.event ?? data; // supports both {event:{}} or direct object
+  const event: EventDocument = data?.event ?? data;
 
   return (
     <section id="event">
@@ -129,11 +137,31 @@ const EventDetails = async ({ params }: PromiseParams) => {
         </div>
         {/* Event Booking */}
         <aside className="booking">
-          <h2>Book Your Spot</h2>
-          <p className="text-lg font-semibold">
-            Don't miss out on this event! Reserve your spot now.
-          </p>
+          <div className="signup-card">
+            <h2>Book Your Spot</h2>
+            {bookings > 0 ? (
+              <p className="text-sm">
+                Join {bookings} others attending this event.
+              </p>
+            ) : (
+              <p className="text-sm">
+                Be the first to book a spot for this event!
+              </p>
+            )}
+            <BookEvent />
+          </div>
         </aside>
+      </div>
+
+      <div className="flex w-full flex-col gap-4 pt-20">
+        {similarEvents.length > 0 && (
+          <>
+            <h2>Similar Events</h2>
+            {similarEvents.map((similarEvent: EventDocument) => (
+              <EventCard {...similarEvent} key={similarEvent.slug} />
+            ))}
+          </>
+        )}
       </div>
     </section>
   );

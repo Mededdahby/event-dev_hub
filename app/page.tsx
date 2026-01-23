@@ -1,12 +1,14 @@
 import ExpoloreBtn from "@/components/ExpoloreBtn";
 import EventCard from "@/components/EventCrad";
 import { EventDocument } from "@/database/event.model";
+import { cacheLife } from "next/cache";
 const NEXT_URI = process.env.NEXT_PUBLIC_URI;
 const Page = async () => {
+  "use cache";
+  cacheLife("hours"); // Cache the fetch for 10 seconds
   const res = await fetch(`${NEXT_URI}/api/events`);
   if (!res.ok) {
     // Handle error - render empty state or throw for error boundary
-    console.error(`Failed to fetch events: ${res.status}`);
     return (
       <section>
         <h1 className="text-center">
@@ -18,6 +20,7 @@ const Page = async () => {
       </section>
     );
   }
+
   const { events } = await res.json();
   return (
     <section>
