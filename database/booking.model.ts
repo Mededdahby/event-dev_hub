@@ -4,6 +4,7 @@ import { Event } from "./event.model";
 export interface BookingDocument extends Document {
   eventId: Types.ObjectId;
   email: string;
+  slug?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,17 +26,21 @@ const bookingSchema = new Schema<BookingDocument>(
       lowercase: true,
       validate: (value: string) => emailRegex.test(value),
     },
+    slug: {
+      type: String,
+      required: false,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 bookingSchema.pre("save", async function (next) {
   // Ensure the referenced event exists before saving the booking.
   const eventExists = await Event.exists({ _id: this.eventId });
   if (!eventExists) {
-    return next(new Error("Referenced event does not exist."));
+    return new Error("Referenced event does not exist.");
   }
-  return next();
+  return;
 });
 
 export const Booking: Model<BookingDocument> =

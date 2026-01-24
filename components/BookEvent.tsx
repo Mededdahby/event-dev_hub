@@ -1,13 +1,21 @@
 "use client";
-import { constants } from "buffer";
 import { useState } from "react";
-const BookEvent = () => {
+import { constants } from "buffer";
+import { BookEventAction } from "@/lib/actions/Boonking.actions";
+
+const BookEvent = ({ slug, eventId }: { slug: string; eventId: string }) => {
   const [email, setEmail] = useState("");
   const [submited, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+
+    const success = await BookEventAction({ eventId, slug, email });
+    if (success) {
+      setSubmitted(true);
+    } else {
+      alert("Failed to book event. Please try again.");
+    }
   };
 
   return (
@@ -35,8 +43,7 @@ const BookEvent = () => {
             className="button-submit"
             type="submit"
             onClick={(e) => {
-              e.preventDefault();
-              setSubmitted(true);
+              handleSubmit(e);
             }}
           >
             Book Now
