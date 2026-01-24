@@ -2,10 +2,10 @@ import ExpoloreBtn from "@/components/ExpoloreBtn";
 import EventCard from "@/components/EventCrad";
 import { EventDocument } from "@/database/event.model";
 import { cacheLife } from "next/cache";
+
 const NEXT_URI = process.env.NEXT_PUBLIC_URI;
+
 const Page = async () => {
-  "use cache";
-  cacheLife("hours");
   const res = await fetch(`${NEXT_URI}/api/events`);
   if (!res.ok) {
     // Handle error - render empty state or throw for error boundary
