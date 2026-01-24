@@ -38,11 +38,9 @@ bookingSchema.pre("save", async function (next) {
   // Ensure the referenced event exists before saving the booking.
   const eventExists = await Event.exists({ _id: this.eventId });
   if (!eventExists) {
-    return new Error("Referenced event does not exist.");
+    throw new Error("Referenced event does not exist.");
   }
-  return;
 });
-
 export const Booking: Model<BookingDocument> =
   mongoose.models.Booking ??
   mongoose.model<BookingDocument>("Booking", bookingSchema);
